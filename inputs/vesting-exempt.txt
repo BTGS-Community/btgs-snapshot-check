@@ -1,0 +1,7 @@
+# Wallets that never vest (confirmed exchange wallets).
+# One address marks its whole wallet as exempt.
+bcg1qzmymhq7va9avsh4v25qahe4py3fnjznf7avpxr  # NestEx deposit address (from NestEx deposit history)
+bcg1q7njy4p624qu98lwzu8updwdsj7p78j30zj92w7  # NestEx, confirmed by kojagiri 16 Oct (207-address wallet)
+bcg1q9hzm2pwh72evlzenx2ka8l7804gcxrxc0ge09c  # NestEx hot wallet (consolidation, confirmed by kojagiri 17 Oct)
+# NestEx will consolidate into a new address before the move: add it here when they send the txid.
+# Add other confirmed exchange addresses here once the exchanges confirm them.

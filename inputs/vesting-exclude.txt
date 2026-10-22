@@ -1,0 +1,10 @@
+# Addresses left OUT of the snapshot for the vesting model.
+# Based on the proposal "exclude only what the former developer still controls".
+# One address excludes its whole wallet (addresses spent together).
+# This is a MODEL input, not a decision - the review and the community vote decide.
+bcg1qc247txpphd8matdk66nc0sywp9pzs5fqjpzjylu7p0hhn76stm0qft4838  # 2-of-3 multisig, ~424k
+GYcEKCsBURScGnegzQpVRALB3DHEm6au3D  # premine branch, frozen by old dev's code
+# bcg1q43lm3t8haa45qwc5f2u4g6tdunmkrkr32lfhmx  REMOVED 17 Oct: was a NestEx deposit address (swept by NestEx, block 17407)
+GS4ruzv2WEUKGpRQFirYoBBarKoei25CDF  # premine branch, block 5123
+# bcg1qynzn3jrkw2tnksm25ycagl4yuwc386rnfu722h  REMOVED 17 Oct: was a NestEx deposit address (swept by NestEx, block 17407)
+# The 207-address "operating wallet" is NestEx (confirmed 16 Oct) -> NOT excluded, it's in vesting-exempt.txt.
