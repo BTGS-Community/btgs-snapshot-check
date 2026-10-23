@@ -10,14 +10,14 @@ Optional files (one address per line, # = comment):
   --exclude FILE  addresses left out of the snapshot (one address excludes its whole wallet)
   --exempt  FILE  addresses that never vest (e.g. confirmed exchange wallets)
 Output: btgs-vesting-model.txt (keep it private: it lists the affected wallets)."""
+from btgs_rpcauth import get_auth
 import argparse, base64, json, os, time, urllib.request
 from collections import defaultdict
 from decimal import Decimal
 
 class RPC:
     def __init__(self, port, cookie):
-        with open(cookie) as f:
-            auth = f.read().strip()
+        auth = get_auth(cookie)
         self.url = f"http://127.0.0.1:{port}/"
         self.hdr = {"Authorization": "Basic " + base64.b64encode(auth.encode()).decode(),
                     "Content-Type": "application/json"}

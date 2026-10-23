@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """BTGS top-miner check (read-only): when did the biggest mining wallets mine,
 and did their coins flow into the premine-path transactions?"""
+from btgs_rpcauth import get_auth
 import argparse, base64, json, os, time, urllib.request, datetime
 from collections import defaultdict
 from decimal import Decimal
 
 class RPC:
     def __init__(self, port, cookie):
-        with open(cookie) as f:
-            auth = f.read().strip()
+        auth = get_auth(cookie)
         self.url = f"http://127.0.0.1:{port}/"
         self.hdr = {"Authorization": "Basic " + base64.b64encode(auth.encode()).decode(),
                     "Content-Type": "application/json"}

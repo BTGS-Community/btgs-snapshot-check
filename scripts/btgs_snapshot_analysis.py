@@ -19,6 +19,7 @@ Usage:
   python3 btgs_snapshot_analysis.py                       # mainnet defaults
   python3 btgs_snapshot_analysis.py --port 18881 --datadir ~/.btgs
 """
+from btgs_rpcauth import get_auth
 import argparse, base64, json, os, sys, time, urllib.request
 from collections import defaultdict, deque
 from decimal import Decimal
@@ -26,8 +27,7 @@ from decimal import Decimal
 # ---------------------------------------------------------------- RPC
 class RPC:
     def __init__(self, port, cookie):
-        with open(cookie) as f:
-            auth = f.read().strip()
+        auth = get_auth(cookie)
         self.url = f"http://127.0.0.1:{port}/"
         self.hdr = {"Authorization": "Basic " + base64.b64encode(auth.encode()).decode(),
                     "Content-Type": "application/json"}

@@ -2,14 +2,14 @@
 """BTGS link check (read-only): do the coins of the #1 miner wallet reach the
 wallet that fed the most coins into the premine path?  Works on wallet level
 (addresses spent together = one wallet) and shows the money flow paths."""
+from btgs_rpcauth import get_auth
 import argparse, base64, json, os, time, urllib.request
 from collections import defaultdict, deque
 from decimal import Decimal
 
 class RPC:
     def __init__(self, port, cookie):
-        with open(cookie) as f:
-            auth = f.read().strip()
+        auth = get_auth(cookie)
         self.url = f"http://127.0.0.1:{port}/"
         self.hdr = {"Authorization": "Basic " + base64.b64encode(auth.encode()).decode(),
                     "Content-Type": "application/json"}

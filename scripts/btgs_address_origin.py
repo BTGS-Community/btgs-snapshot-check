@@ -6,14 +6,14 @@ For each address you give it, shows where its coins came from:
     (proportional "haircut" method: every transaction passes on the premine share of its inputs)
   - the biggest senders, with their own premine share
 Usage:  python3 btgs_address_origin.py bcg1q... [bcg1q... more]"""
+from btgs_rpcauth import get_auth
 import argparse, base64, json, os, time, urllib.request
 from collections import defaultdict
 from decimal import Decimal
 
 class RPC:
     def __init__(self, port, cookie):
-        with open(cookie) as f:
-            auth = f.read().strip()
+        auth = get_auth(cookie)
         self.url = f"http://127.0.0.1:{port}/"
         self.hdr = {"Authorization": "Basic " + base64.b64encode(auth.encode()).decode(),
                     "Content-Type": "application/json"}

@@ -4,13 +4,14 @@ Finds all P2WSH (multisig-type) addresses that received a lot of BTGS, and for
 every one that has ever SPENT coins it shows the script that was revealed:
 how many signatures are needed (e.g. 2-of-2) and which public keys are in it,
 plus the normal G... / bcg1q... addresses those keys belong to."""
+from btgs_rpcauth import get_auth
 import argparse, base64, json, os, time, urllib.request
 from collections import defaultdict
 from decimal import Decimal
 
 class RPC:
     def __init__(self, port, cookie):
-        auth = open(cookie).read().strip()
+        auth = get_auth(cookie)
         self.url = f"http://127.0.0.1:{port}/"
         self.hdr = {"Authorization": "Basic " + base64.b64encode(auth.encode()).decode(),
                     "Content-Type": "application/json"}

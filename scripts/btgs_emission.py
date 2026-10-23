@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """BTGS actual emission check (read-only): real blocks/day vs the 144/day target."""
 import base64, json, os, urllib.request, datetime
-cookie = open(os.path.expanduser("~/.btgs/.cookie")).read().strip()
+from btgs_rpcauth import get_auth
+cookie = get_auth(os.path.expanduser("~/.btgs/.cookie"))
 hdr = {"Authorization": "Basic " + base64.b64encode(cookie.encode()).decode(), "Content-Type": "application/json"}
 def rpc(m, *p):
     req = urllib.request.Request("http://127.0.0.1:18881/", json.dumps({"id": 1, "method": m, "params": list(p)}).encode(), hdr)
