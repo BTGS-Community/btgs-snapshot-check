@@ -44,7 +44,9 @@ class UF:
         return x
     def union(self, a, b):
         ra, rb = self.find(a), self.find(b)
-        if ra != rb: self.p[ra] = rb
+        if ra != rb:                    # root = smallest address, so the result
+            if rb < ra: ra, rb = rb, ra  # never depends on processing order
+            self.p[rb] = ra
 
 FROZEN = {"bcg1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqnmxfsvxdead",
           "GYcEKCsBURScGnegzQpVRALB3DHEm6au3D"}
@@ -71,7 +73,7 @@ def main():
                 if "coinbase" in vin: continue
                 k = (vin["txid"], vin["vout"]); ins.append(k)
                 spent_by[k] = txid; unspent.discard(k)
-            in_addrs = {out[k][1] for k in ins}
+            in_addrs = sorted({out[k][1] for k in ins})
             first = None
             for ad in in_addrs:                 # common-input heuristic
                 uf.find(ad)
@@ -99,7 +101,7 @@ def main():
 
     # cluster stats
     members = defaultdict(list)
-    for ad in list(uf.p):
+    for ad in sorted(uf.p):
         members[uf.find(ad)].append(ad)
     def stats(root):
         ads = members[root]
@@ -132,7 +134,7 @@ def main():
     w("-" * 72)
     w(f"  addresses: {len(ads)}   balance now: {fmt(bal)} BTGS   mined: {fmt(mn)} BTGS in {nb} blocks"
       f" ({(mn/total_mined*100 if total_mined else 0):.1f}% of all mined)")
-    for x in sorted(ads, key=lambda x: -balance[x])[:20]:
+    for x in sorted(ads, key=lambda x: (-balance[x], x))[:20]:
         if balance[x] > 0 or mined[x] > 0:
             w(f"    {x:62s} bal {fmt(balance[x]):>16s}  mined {fmt(mined[x]):>14s}{'  FROZEN/BURN' if x in FROZEN else ''}")
     w("")
@@ -148,24 +150,24 @@ def main():
     for r in roots_B:
         bal, mn, nb, ads = stats(r)
         tb += bal; tm += mn
-        top = sorted(ads, key=lambda x: -balance[x])[0]
+        top = sorted(ads, key=lambda x: (-balance[x], x))[0]
         w(f"  wallet {r[:20]}...  {len(ads):4d} addrs  bal {fmt(bal):>16s}  mined {fmt(mn):>14s}  biggest: {top} ({fmt(balance[top])})")
     w(f"  total: balance {fmt(tb)} BTGS, mined {fmt(tm)} BTGS")
     w("")
 
     w(f"TOP {a.top} WALLETS ON THE CHAIN (by balance now)")
     w("-" * 72)
-    allroots = sorted(members, key=lambda r: -stats(r)[0])
+    allroots = sorted(members, key=lambda r: (-stats(r)[0], r))
     for i, r in enumerate(allroots[:a.top], 1):
         bal, mn, nb, ads = stats(r)
         tag = "  <- WALLET A (premine)" if r == rootA else ("  <- on premine path" if r in roots_B else "")
-        top = sorted(ads, key=lambda x: -balance[x])[0]
+        top = sorted(ads, key=lambda x: (-balance[x], x))[0]
         w(f"  {i:2d}. {len(ads):4d} addrs  bal {fmt(bal):>16s} ({bal/total_supply*100:5.2f}%)  mined {fmt(mn):>14s} ({nb} blk){tag}")
         w(f"        biggest address: {top}{'  FROZEN/BURN' if top in FROZEN else ''}")
     w("")
     w(f"TOP {a.top} MINING WALLETS (all-time)")
     w("-" * 72)
-    for i, r in enumerate(sorted(members, key=lambda r: -stats(r)[1])[:a.top], 1):
+    for i, r in enumerate(sorted(members, key=lambda r: (-stats(r)[1], r))[:a.top], 1):
         bal, mn, nb, ads = stats(r)
         tag = "  <- WALLET A (premine)" if r == rootA else ("  <- on premine path" if r in roots_B else "")
         w(f"  {i:2d}. mined {fmt(mn):>14s} ({mn/total_mined*100:5.1f}%) in {nb:6d} blocks  bal now {fmt(bal):>16s}  {len(ads)} addrs{tag}")

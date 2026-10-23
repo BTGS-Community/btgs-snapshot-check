@@ -42,7 +42,9 @@ class UF:
         return x
     def union(self, a, b):
         ra, rb = self.find(a), self.find(b)
-        if ra != rb: self.p[ra] = rb
+        if ra != rb:                    # root = smallest address, so the result
+            if rb < ra: ra, rb = rb, ra  # never depends on processing order
+            self.p[rb] = ra
 
 def main():
     ap = argparse.ArgumentParser()
@@ -69,7 +71,7 @@ def main():
                 k = (vin["txid"], vin["vout"]); ins.append(k)
                 spent_by[k] = txid; unspent.discard(k)
             first = None
-            for ad in {out[k][1] for k in ins}:
+            for ad in sorted({out[k][1] for k in ins}):
                 uf.find(ad)
                 if first is None: first = ad
                 else: uf.union(first, ad)
@@ -111,7 +113,7 @@ def main():
     clusters = defaultdict(list)
     for ad in mined_blocks:
         clusters[uf.find(ad)].extend(mined_blocks[ad])
-    ranked = sorted(clusters.items(), key=lambda kv: -sum(v for _, _, v in kv[1]))
+    ranked = sorted(clusters.items(), key=lambda kv: (-sum(v for _, _, v in kv[1]), kv[0]))
 
     def d(ts): return datetime.datetime.fromtimestamp(ts, datetime.timezone.utc).strftime("%Y-%m-%d %H:%M")
     L = []; w = L.append
@@ -138,7 +140,7 @@ def main():
     w("WALLETS THAT FED COINS INTO THE PREMINE PATH (top 10)")
     w("-" * 72)
     mined_by_root = {r: sum(v for _, _, v in b) for r, b in clusters.items()}
-    for r, v in sorted(other_in.items(), key=lambda x: -x[1])[:10]:
+    for r, v in sorted(other_in.items(), key=lambda x: (-x[1], x[0]))[:10]:
         w(f"  {r[:24]}...  fed {fmt(v):>16s} BTGS   this wallet mined {fmt(mined_by_root.get(r, Decimal(0)))} BTGS")
     report = "\n".join(L)
     with open("btgs-miners.txt", "w") as f: f.write(report + "\n")

@@ -43,7 +43,9 @@ class UF:
         return x
     def union(self, a, b):
         ra, rb = self.find(a), self.find(b)
-        if ra != rb: self.p[ra] = rb
+        if ra != rb:                    # root = smallest address, so the result
+            if rb < ra: ra, rb = rb, ra  # never depends on processing order
+            self.p[rb] = ra
 
 def main():
     ap = argparse.ArgumentParser()
@@ -69,7 +71,7 @@ def main():
                 k = (vin["txid"], vin["vout"]); ins.append(k)
                 spent_by[k] = txid; unspent.discard(k)
             first = None
-            for ad in {out[k][1] for k in ins}:
+            for ad in sorted({out[k][1] for k in ins}):
                 uf.find(ad)
                 if first is None: first = ad
                 else: uf.union(first, ad)
@@ -87,10 +89,10 @@ def main():
             print(f"  block {h}/{tip} ({time.time()-t0:.0f}s)", flush=True)
 
     members = defaultdict(list)
-    for ad in list(uf.p): members[uf.find(ad)].append(ad)
+    for ad in sorted(uf.p): members[uf.find(ad)].append(ad)
     mined_c = defaultdict(Decimal)
     for ad, v in mined.items(): mined_c[uf.find(ad)] += v
-    M = max(mined_c, key=lambda r: mined_c[r])          # #1 miner wallet
+    M = max(sorted(mined_c), key=lambda r: mined_c[r])          # #1 miner wallet
 
     # premine path + feeder wallets (same rules as btgs_miners.py)
     path_tx = set(); path_keys = set(); branches = list(premine)
@@ -110,7 +112,7 @@ def main():
             if k not in path_keys: fed[uf.find(out[k][1])] += out[k][0]
     if not fed:
         print("No other wallets fed coins into the premine path - nothing to check."); return
-    F = max(fed, key=lambda r: fed[r])                   # biggest feeder wallet
+    F = max(sorted(fed), key=lambda r: fed[r])                   # biggest feeder wallet
     path_wallets = {uf.find(out[k][1]) for k in path_keys}
 
     # wallet-to-wallet money flow graph
@@ -153,7 +155,7 @@ def main():
         while q and len(res) < limit:
             node, p, bott = q.popleft()
             if len(p) - 1 >= a.max_hops: continue
-            for d_, v in sorted(nbrs[node], key=lambda x: -x[1]):
+            for d_, v in sorted(nbrs[node], key=lambda x: (-x[1], x[0])):
                 b = v if bott is None else min(bott, v)
                 if d_ in targets:
                     res.append((p + [d_], b))
@@ -173,12 +175,12 @@ def main():
     w("")
     w("WHERE THE #1 MINER SENT ITS COINS (top 12 receiving wallets)")
     w("-" * 72)
-    for d_, v in sorted(nbrs[M], key=lambda x: -x[1])[:12]:
+    for d_, v in sorted(nbrs[M], key=lambda x: (-x[1], x[0]))[:12]:
         w(f"  {fmt(v):>16s} BTGS -> {label(d_)}  (first at block {first_h[(M, d_)]})")
     w("")
     w("WHERE THE TOP FEEDER GOT ITS COINS (top 12 sending wallets)")
     w("-" * 72)
-    inc = sorted(((s, v) for (s, d_), v in edge.items() if d_ == F), key=lambda x: -x[1])[:12]
+    inc = sorted(((s, v) for (s, d_), v in edge.items() if d_ == F), key=lambda x: (-x[1], x[0]))[:12]
     for s, v in inc:
         w(f"  {fmt(v):>16s} BTGS <- {label(s)}  (first at block {first_h[(s, F)]})")
     w(f"  (feeder also mined {fmt(mined_c[F])} BTGS itself)")
