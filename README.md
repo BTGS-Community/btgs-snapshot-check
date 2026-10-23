@@ -7,6 +7,7 @@ All scripts only **read** from your node. They never send transactions and never
 ## What you need
 
 - A synced BTGS node on the **existing chain** (built from [btgs-core-old](https://github.com/BTGS-Community/btgs-core-old), commit `6f988e8`), with RPC on (`server=1`)
+- RPC login: the scripts use your node's `.cookie` file, or `rpcuser`/`rpcpassword` from `btgs.conf` in the same folder. You can also set them yourself: `BTGS_RPCUSER=name BTGS_RPCPASSWORD=pass bash run_all.sh 17416`. The login is only used to talk to your own node on 127.0.0.1.
 - Python 3.8 or newer (no extra packages)
 - Linux or macOS. On Windows, use WSL.
 
